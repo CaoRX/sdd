@@ -1,0 +1,14 @@
+# data files
+*.dat
+*.npz
+*.npy
+data/
+
+# local setting
+SETTINGS
+
+# vscode setting
+.vscode
+
+# python runtime
+__pycache__
