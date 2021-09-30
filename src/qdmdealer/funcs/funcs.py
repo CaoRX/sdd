@@ -4,6 +4,7 @@ import random
 import matplotlib.transforms as mplTransforms
 import math
 import os
+from copy import deepcopy
 
 def errorMessage(message, loc = None):
     if loc is None:
@@ -27,6 +28,8 @@ def sizeOfShape(shape):
     return res
 
 def loadNpzObject(obj):
+    if not isinstance(obj, np.ndarray):
+        return obj
     if len(obj.shape) > 0:
         return obj
     resObj = obj.item()
@@ -759,3 +762,42 @@ def toBool(s):
         return True
     else:
         return False
+
+def dictEqual(a, b, eps = 1e-7):
+    aKeys = sorted(list(a.keys()))
+    bKeys = sorted(list(b.keys()))
+    if aKeys != bKeys:
+        return False
+    for key in aKeys:
+        if isinstance(a[key], float):
+            if not floatEqual(a[key], b[key], eps):
+                return False
+
+        else:
+            if not (a[key] == b[key]):
+                return False
+    return True
+
+def dictExcept(d, outKeys):
+    res = dict()
+    for key in d:
+        if not (key in outKeys):
+            res[key] = deepcopy(d[key])
+    return res
+
+def makeLabel(d):
+    keys = sorted(d.keys())
+    
+    return ', '.join('{} = {}'.format(key, d[key]) for key in keys)
+
+def isAllNone(l):
+    for x in l:
+        if x is not None:
+            return False
+    return True
+
+def accumulate(a, b):
+    if a is None:
+        return b
+    else:
+        return a + b

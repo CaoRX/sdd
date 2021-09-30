@@ -24,6 +24,13 @@ def getBinDataList(data):
                 binDataList.append(binDataName)
     return binDataList
 
+def getBinderDataList(data):
+    binderDataList = []
+    for dataKey in data:
+        if dataKey.endswith('124'):
+            binderDataList.append(dataKey[:-3])
+    return binderDataList
+
 def analyzeBinData(data, dataName, dataN):
     value = data[dataName + ' average']
     binSumName = dataName + ' bin sum'
@@ -57,5 +64,68 @@ def dataNProcessorFunc(**kwargs):
     para['data n'] = int(para.get('loop n') * (1 - para.get('equil')) + 1e-5)
     return dict()
 
-dataNProcessor = DataProcessor(func = dataNProcessorFunc, name = 'data n processor')
+def binderAnalyzeFunc(**kwargs):
+    obs = kwargs.get('obs')
+    res = dict()
+
+    binderDataList = getBinderDataList(obs)
+    for binderDataName in binderDataList:
+        binderData = obs[binderDataName + '124']
+        res[binderDataName + ' binder'] = {'value': binderData['value'][2] / (binderData['value'][1] ** 2)}
+    
+    return res
+
+def windingNumberAnalyzeFunc(**kwargs):
+    data = kwargs.get('data')
+    para = kwargs.get('para')
+    if 'winding number' in para:
+        return dict()
+    para['winding number'] = [int(data.get('winding number 0')), int(data.get('winding number 1'))]
+    return dict()
+
+denseProcessorSet = dict()
+
+def cos2tAnalyzeFunc(**kwargs):
+    dense = kwargs.get('dense')
+    para = kwargs.get('para')
+
+    L = para.get("L")
+    n, m = L, L
+    sx = (n * m + 1)
+    sy = sx
+
+    r = (sx - 1) // 2
+    x = None 
+    y = None
+    d = None
+
+    res = dict()
+
+    for i in [1, 2, 4]:
+        obsName = 'cos2t{}'.format(i)
+        # print('obsName = {}'.format(obsName))
+        if L in denseProcessorSet and obsName in denseProcessorSet[L]:
+            data = denseProcessorSet[L][obsName]
+        else:
+            if d is None:
+                x = np.arange(-r, r + 0.5, 1)
+                y = np.arange(-r, r + 0.5, 1)
+                x, y = np.meshgrid(x, y)
+                d = (x ** 2 - y ** 2) / (x ** 2 + y ** 2)
+                d[r][r] = 0.0
+            data = d ** i
+            if L not in denseProcessorSet:
+                denseProcessorSet[L] = dict()
+            denseProcessorSet[L][obsName] = data
+        # print(data.shape, dense['psi int hist int2DHist'].shape)
+            
+        res[obsName] = {'value': np.sum(data * dense['psi int hist int2DHist']) / np.sum(dense['psi int hist int2DHist'])}
+    
+    res['cos2t binder'] = {'value': res['cos2t4'].get('value') / (res['cos2t2'].get('value') ** 2)}
+    return res
+
+windingNumberProcessor = DataProcessor(func = windingNumberAnalyzeFunc, name = 'wn processor')
+dataNProcessor = DataProcessor(func = dataNProcessorFunc, name = 'dataN processor')
 binProcessor = DataProcessor(func = binAnalyzeFunc, name = 'bin analyzer')
+binderProcessor = DataProcessor(func = binderAnalyzeFunc, name = 'binder analyzer')
+cos2tProcessor = DataProcessor(func = cos2tAnalyzeFunc, name = 'cos2t analyzer')

@@ -9,7 +9,7 @@ def weightedBootstrapEstimateFunctionalByFunc(f, weights, *args):
         res = {'value': f(*sampleData)}
         return res
 
-    weights = np.array(weights) / np.sum(weights)
+    weights = np.array(weights) / np.sum(np.array(weights))
     args = [np.array(arg) for arg in args]
     # print(weights, args[0])
     # n = min(len(args[0]), 10000)

@@ -8,6 +8,11 @@ from qdmdealer.settingLoader import loadSetting, getSetting
 
 from qdmdealer.dataloading.datacollection import DataCollection, defaultLoadingOptions
 from qdmdealer.dataloading.datafragment import DataFragment, defaultLightLoadingOptions
+from qdmdealer.plotfuncs.plotfuncs import plotObs
+
+import matplotlib.pyplot as plt
+import qdmdealer.funcs.funcs as funcs
+import qdmdealer.plotfuncs.plotfuncs as plotfuncs
 
 def makeQDMPS(**kwargs):
     ps = ParameterSet()
@@ -25,10 +30,12 @@ def makeTimestampPS(low, high):
     return ps
 
 if __name__ == '__main__':
-    ps = makeQDMPS(T = {'type': 'range', 'value': (0.71, 0.73)})
+    ps = makeQDMPS(T = {'type': 'range', 'value': (0.70, 0.90)}, wn = {'type': 'value', 'value': [0, 0]})
+
     # print(ps)
 
-    tsps = makeTimestampPS(1630822146, 1630822148)
+    # tsps = makeTimestampPS(1630822146, 1630822148)
+    tsps = makeTimestampPS(0, 2000000000)
     # print(tsps)
 
     dc = DataCollection()
@@ -40,6 +47,7 @@ if __name__ == '__main__':
     dfOptions = defaultLightLoadingOptions
     df = DataFragment(data = data)
     # print(df.data)
+    # print(df.data)
     # for ds in df.getFilteredDataIterable(desFilter = nps.generateFilter()):
     #     print(ds.getDescriber())
 
@@ -47,5 +55,24 @@ if __name__ == '__main__':
     # print(df.data)
     # print(df.dataSets)
     print('dummy keys = {}'.format(df.dummyKeys))
+    print(df.data[:10])
 
-    print(df.getObs('rop124', idx = 0))
+    histKey = 'psi int hist int2DHist'
+    hist = df.combine(histKey)
+    histN = len(hist)
+    x, y = plotfuncs.bestXY(histN)
+    fig, axes = plotfuncs.getAxes(x, y)
+
+    for data, ax in zip(hist, axes):
+        ax.imshow(data[histKey])
+    plt.show()
+
+    # obs = df.getObs('rop binder', idx = 0)
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(121)
+    plotObs(obsName = 'rop binder', obsData = df.getObs('rop binder', idx = None), axis = 'T', ax = ax1)
+    ax2 = fig.add_subplot(122)
+    plotObs(obsName = 'cos2t binder', obsData = df.getObs('cos2t binder', idx = None), axis = 'T', ax = ax2)
+
+    plt.show()

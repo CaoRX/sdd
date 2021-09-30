@@ -87,11 +87,11 @@ class DataCollection:
         port = str(port)
         return (setName in self.jsonData) and (port in self.jsonData[setName])
 
-    def appendItem(self, setNo, seed, port, describer):
+    def appendItem(self, setNo, seed, port, describer, force = False):
         if self.jsonData is not None:
             setName = encodeSetSeed(setNo = setNo, seed = seed)
             port = str(port)
-            if setName in self.jsonData and port in self.jsonData[setName]:
+            if setName in self.jsonData and port in self.jsonData[setName] and (not force):
                 return False
             if not setName in self.jsonData:
                 self.jsonData[setName] = dict()
@@ -134,7 +134,7 @@ class DataCollection:
                     continue
                 print('loading data set (setNo = {}, seed = {}, port = {})'.format(setNo, seed, port))
                 dataSet = DataSet(DataLabel(seed, port, setNo), **kwargs)
-                self.appendItem(setNo, seed, port, dataSet.getDescriber())
+                self.appendItem(setNo, seed, port, dataSet.getDescriber(), force = force)
 
                 dataSet.saveToNpzFiles()
                 port += 1

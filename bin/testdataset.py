@@ -26,7 +26,7 @@ dataNProcessor = dataProcessor.DataProcessor(func = dataNProcessorFunc, name = '
 
 if __name__ == '__main__':
     dl = DataLabel(setNo = 1630683685, seed = 1630822089, port = 0)
-    ds = DataSet(dataLabel = dl, fromRawData = False, obsDataOnly = False, dataProcessors = [dataNProcessor, dataProcessor.binProcessor], loadDenseData = True)
+    ds = DataSet(dataLabel = dl, fromRawData = False, obsDataOnly = False, dataProcessors = [dataNProcessor, dataProcessor.binProcessor, dataProcessor.binderProcessor, dataProcessor.cos2tProcessor], loadDenseData = True)
     # print(ds)
     # print(ds.data.keys())
     # print(ds.obs.keys())
@@ -51,5 +51,11 @@ if __name__ == '__main__':
     # print('dense keys = {}'.format(ds.dense.keys()))
     print('obs = {}'.format(ds.obs))
 
+    print('para keys = {}'.format(ds.para.keys()))
+    print('describer = {}'.format(ds.getDescriber()))
+    print('obs keys = {}'.format(ds.obs.keys()))
+    print('data keys = {}'.format(ds.data.keys()))
+    print('dense keys = {}'.format(ds.dense.keys()))
+    print('shared = {}'.format(ds.shared))
 
 

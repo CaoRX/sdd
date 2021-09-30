@@ -15,7 +15,7 @@ import qdmdealer.dataloading.dataprocessor as dataProcessor
 # 6. obtain data
 # 7. plot
 
-# TODO: combine dense data, after combined, add a hook to 
+# TODO: combine dense data, after combined, add a hook to combine all int2DHist with 
 
 # defaultLoadingOptions = {
 #     'fromRawData': True, 
@@ -38,8 +38,11 @@ if __name__ == '__main__':
 
     options = defaultLoadingOptions
     options['denseFilters'] = [lambda x: x.find('series') != -1, lambda x: x.find('int2DHist') != -1]
+    options['dataProcessors'].append(dataProcessor.windingNumberProcessor)
     options['dataProcessors'].append(dataProcessor.dataNProcessor)
     options['dataProcessors'].append(dataProcessor.binProcessor)
+    options['dataProcessors'].append(dataProcessor.binderProcessor)
+    options['dataProcessors'].append(dataProcessor.cos2tProcessor)
 
     dc.append(1630683685, force = True, **options)
     dc.save()

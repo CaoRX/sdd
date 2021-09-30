@@ -37,6 +37,7 @@ class DataSet:
         self.fromRawData = kwargs.get('fromRawData', False)
         self.obsDataOnly = kwargs.get('obsDataOnly', True)
         self.loadDenseData = kwargs.get('loadDenseData', False)
+        self.loadSharedData = kwargs.get('loadSharedData', False)
         self.removeOriginalData = kwargs.get('removeOriginalData', False)
         self.discardFuncs = kwargs.get('discardFuncs', lambda x: False)
         self.rootFolder = kwargs.get('rootFolder', defaultRoot)
@@ -73,6 +74,7 @@ class DataSet:
         self.data = None
         self.para = None
         self.dense = None
+        self.shared = None
         self.obs = dict([])
         self.describer = None
         self.dataLabel = dataLabel
@@ -121,9 +123,9 @@ class DataSet:
         if not os.path.isdir(npzToPort):
             os.mkdir(npzToPort)
 
-        self.npzFileTypes = ['data', 'para', 'obs']
+        self.npzFileTypes = ['data', 'para', 'obs', 'dense', 'shared']
 
-        filenameDict = {'npz data': 'data.npz', 'npz dense': 'dense.npz', 'npz para': 'para.json', 'npz obs': 'obs.npz'}
+        filenameDict = {'npz data': 'data.npz', 'npz dense': 'dense.npz', 'npz para': 'para.json', 'npz obs': 'obs.npz', 'npz shared': 'shared.npz'}
         for key in filenameDict:
             self.files[key] = os.path.join(npzFolder, filenameDict[key])
 
@@ -177,6 +179,7 @@ class DataSet:
             data = binarydatabuffer.loadDataFile(self.files['raw data'])
             self.data = dict()
             self.dense = dict()
+            self.shared = None
             for key in data:
                 if self.denseFilter(key):
                     # then this key is belonging to dense data
@@ -203,9 +206,31 @@ class DataSet:
                 self.data = funcs.loadNpzFile(self.files['npz data'])
                 if self.loadDenseData:
                     self.dense = funcs.loadNpzFile(self.files['npz dense'])
+                else:
+                    self.dense = None
+                if self.loadSharedData:
+                    self.shared = funcs.loadNpzFile(self.files['npz shared'])
+                else:
+                    self.shared = None
                 self.discardDataItems()
                 self.applyDataProcessors(force = self.forceUpdateObs)
                 self.saveToNpzObsFile()
+
+    def loadShared(self):
+        try:
+            self.shared = funcs.loadNpzFile(self.files['npz shared'])
+        except:
+            self.shared = None
+        self.loadSharedData = (self.shared is not None)
+    def loadDense(self):
+        try:
+            self.dense = funcs.loadNpzFile(self.files['npz dense'])
+        except:
+            self.dense = None
+        self.loadDenseData = (self.dense is not None)
+    def saveShared(self):
+        if self.shared is not None:
+            np.savez(self.files['npz shared'], **self.shared)
 
     def saveToNpzFiles(self):
         assert (self.data is not None), funcs.errorMessage(message = 'npz data is None in {}'.format(self.dataSetLabel))
@@ -217,6 +242,8 @@ class DataSet:
             np.savez(self.files['npz obs'], **self.obs)
         if self.dense is not None:
             np.savez(self.files['npz dense'], **self.dense)
+        if self.shared is not None:
+            np.savez(self.files['npz shared'], **self.shared)
         with open(self.files['npz para'], 'w') as paraFile:
             json.dump(self.para, paraFile)
             paraFile.close()
