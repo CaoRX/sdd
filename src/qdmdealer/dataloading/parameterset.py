@@ -24,7 +24,7 @@ class ParameterSet:
             typeName = self.para[key]['type']
             value = self.para[key]['value']
             exclude = self.para[key]['exclude']
-            print('processing {}, {}, {}'.format(key, value, typeName))
+            # print('processing {}, {}, {}'.format(key, value, typeName))
 
             if not typeName in validTypeNames:
                 warnings.warn(funcs.warningMessage('para type name {} is not valid: should be one of {}'.format(typeName, validTypeNames), loc = 'ParameterSet.generateFilter'))
@@ -39,7 +39,7 @@ class ParameterSet:
             elif typeName == 'fvalue':
                 def makeClosure(key, value, typeName, exclude):
                     def filter(x):
-                        print(key, value)
+                        # print(key, value)
                         return funcs.floatEqual(x[key], value, eps = parameterEPS)
                     return filter
                 # print(key, typeName, value, exclude)
@@ -53,7 +53,6 @@ class ParameterSet:
             elif typeName == 'fset':
                 def makeClosure(key, value, typeName, exclude):
                     def filter(x):
-                        print('value = {}'.format(value))
                         for y in value:
                             if funcs.floatEqual(x[key], y, eps = parameterEPS):
                                 return True

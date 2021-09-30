@@ -4,6 +4,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(os.path.join(parentdir, 'src'))
 
 from qdmdealer.dataloading.datacollection import DataCollection, defaultLoadingOptions
+import qdmdealer.dataloading.dataprocessor as dataProcessor
 
 # workflow:
 # 1. load DataCollection(~1s)
@@ -13,6 +14,18 @@ from qdmdealer.dataloading.datacollection import DataCollection, defaultLoadingO
 # 5. obtain datasets
 # 6. obtain data
 # 7. plot
+
+# TODO: combine dense data, after combined, add a hook to 
+
+# defaultLoadingOptions = {
+#     'fromRawData': True, 
+#     'obsDataOnly': False, 
+#     'removeOriginData': False, 
+#     'discardFuncs': lambda x: False, 
+#     'rootFolder': getSetting('root'), 
+#     'dataProcessors': [], 
+#     'denseFilters': []
+# }
 
 if __name__ == '__main__':
     dc = DataCollection()
@@ -25,8 +38,10 @@ if __name__ == '__main__':
 
     options = defaultLoadingOptions
     options['denseFilters'] = [lambda x: x.find('series') != -1, lambda x: x.find('int2DHist') != -1]
+    options['dataProcessors'].append(dataProcessor.dataNProcessor)
+    options['dataProcessors'].append(dataProcessor.binProcessor)
 
-    dc.append(1631464238, **options)
+    dc.append(1630683685, force = True, **options)
     dc.save()
 
     print('{} datasets.'.format(dc.dataCount))

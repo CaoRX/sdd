@@ -102,10 +102,10 @@ class DataCollection:
         
         return True
     
-    def append(self, setNo, **kwargs):
+    def append(self, setNo, force, **kwargs):
         if isinstance(setNo, list):
             for singleSet in setNo:
-                self.append(singleSet)
+                self.append(singleSet, force)
             return 
 
         setNo = str(setNo)
@@ -118,6 +118,8 @@ class DataCollection:
             if fileName.isdigit():
                 seedList.append(fileName)
 
+        seedList = sorted(seedList)
+
         for seed in seedList:
             port = 0
             while (True):
@@ -127,9 +129,10 @@ class DataCollection:
                 if (not os.path.isfile(paraFile)) or (not os.path.isfile(dataFile)):
                     break
 
-                if self.checkItem(setNo, seed, port):
+                if self.checkItem(setNo, seed, port) and not force:
                     port += 1
                     continue
+                print('loading data set (setNo = {}, seed = {}, port = {})'.format(setNo, seed, port))
                 dataSet = DataSet(DataLabel(seed, port, setNo), **kwargs)
                 self.appendItem(setNo, seed, port, dataSet.getDescriber())
 

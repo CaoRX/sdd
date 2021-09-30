@@ -88,7 +88,8 @@ class DataSet:
     def applyDataProcessors(self, force = False):
         for dp in self.dataProcessors:
             try:
-                newObsData = dp.func(data = self.data, para = self.para, obs = self.obs)
+                newObsData = dp.func(**{'obs': self.obs, 'data': self.data, 'para': self.para, 'dense': self.dense})
+                # print('obs data = {}'.format(newObsData))
                 for key in newObsData:
                     if (key not in self.obs) or force:
                         self.obs[key] = newObsData[key]

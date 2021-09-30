@@ -33,10 +33,15 @@ def analyzeBinData(data, dataName, dataN):
     error = 2.0 * np.sqrt(data[binSqrName][0] - data[binSumName][0] ** 2) * np.sqrt(autoT / dataN)
     return {'value': value, 'error': error, 'autoT': autoT}
 
-def binAnalyzeFunc(data, para, obs = None):
+def binAnalyzeFunc(**kwargs):
+    data = kwargs.get('data')
+    para = kwargs.get('para')
+    # obs = kwargs.get('obs', None)
     res = dict()
 
     binDataList = getBinDataList(data)
+    # print('bin data = {}'.format(binDataList))
+    # print(para.keys())
     assert ('data n' in para), funcs.errorMessage(message = "no 'data n' found in para {}".format(para))
     dataN = para['data n']
 
@@ -45,4 +50,12 @@ def binAnalyzeFunc(data, para, obs = None):
 
     return res
 
+def dataNProcessorFunc(**kwargs):
+    para = kwargs.get('para')
+    if 'data n' in para:
+        return dict()
+    para['data n'] = int(para.get('loop n') * (1 - para.get('equil')) + 1e-5)
+    return dict()
+
+dataNProcessor = DataProcessor(func = dataNProcessorFunc, name = 'data n processor')
 binProcessor = DataProcessor(func = binAnalyzeFunc, name = 'bin analyzer')

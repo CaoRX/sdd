@@ -26,6 +26,15 @@ def sizeOfShape(shape):
         res *= x 
     return res
 
+def loadNpzObject(obj):
+    if len(obj.shape) > 0:
+        return obj
+    resObj = obj.item()
+    if isinstance(resObj, dict):
+        for key in resObj:
+            resObj[key] = loadNpzObject(resObj[key])
+    return resObj
+
 def loadNpzFile(fileName):
     if not os.path.isfile(fileName):
         return dict()
@@ -44,7 +53,7 @@ def loadNpzFile(fileName):
         #     continue
 
         # print(key)
-        res[key] = data[key]
+        res[key] = loadNpzObject(data[key])
     # print(res)
     return res
 
@@ -737,3 +746,16 @@ def makeFilter(filter, key, exclude):
         return lambda x: (key in x) and filter(x)
     else:
         return lambda x: (key not in x) or filter(x)
+
+def singleTypeName(typeName):
+    if (typeName == 'value') or (typeName == 'set'):
+        return 'value'
+    else:
+        return 'fvalue'
+
+def toBool(s):
+    assert s in ["True", "False"], errorMessage('only True and False can be transferred to bool, {} obtained.'.format(s), loc = 'qdmdealer.funcs.funcs.toBool')
+    if s == 'True':
+        return True
+    else:
+        return False
